@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const express = require("express");
 const cors = require("cors");
-const User = require('./model/user')
-const { specs, swaggerUi } = require('./swagger');
+const User = require("./model/user");
+const { specs, swaggerUi } = require("./swagger");
 dotenv.config();
 
 mongoose.set("strictQuery", false);
@@ -16,7 +16,7 @@ main().catch((err) => console.log(err));
 async function main() {
   await mongoose.connect(mongoDB);
 
-  console.log('Connected to mongo server.');
+  console.log("Connected to mongo server.");
 }
 
 /**
@@ -30,21 +30,19 @@ async function main() {
  *       200:
  *         description: A successful response
  */
-const getAllUsers = (
-  async function (req, res, next) {
-    try {
-      const users = await User.find({})
-      return res.status(200).json({ utilisateurs: users });
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
+const getAllUsers = async function (req, res, next) {
+  try {
+    const users = await User.find({});
+    return res.status(200).json({ utilisateurs: users });
+  } catch (e) {
+    console.log(e);
+    throw e;
   }
-)
+};
 
 /**
-* @description Create one user
-* @route POST /utilisateurs
+ * @description Create one user
+ * @route POST /utilisateurs
  * @swagger
  * /user:
  *   post:
@@ -53,24 +51,21 @@ const getAllUsers = (
  *       200:
  *         description: A successful response
  */
-const createUser = (
-  async function (req, res, next) {
-    try {
-      //const user = await User.create(req.body);
-      const user = new User(req.body)
-      await user.save();
-      return res.status(200).json(req.body);
-    } catch (e) {
-      console.log(e);
-      return res.status(500).json({error: e.message});
-    }
+const createUser = async function (req, res, next) {
+  try {
+    //const user = await User.create(req.body);
+    const user = new User(req.body);
+    await user.save();
+    return res.status(200).json(req.body);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ error: e.message });
   }
-)
-
+};
 
 const router = express.Router();
 
-router.route("/").get(getAllUsers).post(createUser)
+router.route("/").get(getAllUsers).post(createUser);
 
 const app = express();
 
@@ -84,13 +79,11 @@ app.use(express.json());
 
 // api routes
 
-app.get('/', (req, res) => {
-  res.send('Hello World')
-})
+app.get("/", (req, res) => {
+  res.send("Hello World");
+});
 
 app.use("/users", router);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-
-
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 module.exports = app;
