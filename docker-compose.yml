@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+
+  mongo_db:
+    image: mongo
+    restart: always
+  mongo_seed:
+    build: ./mongo-seed
+    # etablish connection to another service
+    links:
+      - mongo_db
+  server:
+    image: nodejs
+    volumes:
+      - .:/server
+      - /server/node_modules
+    build: .
+    restart: always
+    ports:
+      - 8000:8000
+    environment:
+      - MONGODB_URL=mongodb://mongo_db:27017/mydatabase
+      - PORT=8000
+      - FRONT_URL
+    # able to use mongo_db var in environment
+    depends_on:
+      - mongo_db
+    command: node server.js
