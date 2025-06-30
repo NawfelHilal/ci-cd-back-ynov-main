@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const express = require("express");
 const cors = require("cors");
 const User = require("./model/user");
+const Post = require("./model/post");
 const { specs, swaggerUi } = require("./swagger");
 dotenv.config();
 
@@ -63,9 +64,54 @@ const createUser = async function (req, res, next) {
   }
 };
 
+/**
+ * @description Get All posts
+ * @route GET /blogs
+ * @swagger
+ * /blogs:
+ *   get:
+ *     summary: Returns all blog posts
+ *     responses:
+ *       200:
+ *         description: A successful response
+ */
+const getAllPosts = async function (req, res, next) {
+  try {
+    const posts = await Post.find({}).populate("author", "name email");
+    return res.status(200).json({ posts: posts });
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+
+/**
+ * @description Create one post
+ * @route POST /blogs
+ * @swagger
+ * /blogs:
+ *   post:
+ *     summary: Create one blog post
+ *     responses:
+ *       200:
+ *         description: A successful response
+ */
+const createPost = async function (req, res, next) {
+  try {
+    const post = new Post(req.body);
+    await post.save();
+    return res.status(200).json(req.body);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ error: e.message });
+  }
+};
+
 const router = express.Router();
+const blogRouter = express.Router();
 
 router.route("/").get(getAllUsers).post(createUser);
+blogRouter.route("/").get(getAllPosts).post(createPost);
 
 const app = express();
 
@@ -84,6 +130,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/users", router);
+app.use("/blogs", blogRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 module.exports = app;
