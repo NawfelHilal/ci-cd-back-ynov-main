@@ -37,7 +37,7 @@ const getAllUsers = async function (req, res, next) {
     return res.status(200).json({ utilisateurs: users });
   } catch (e) {
     console.log(e);
-    throw e;
+    return next(e);
   }
 };
 
@@ -81,7 +81,7 @@ const getAllPosts = async function (req, res, next) {
     return res.status(200).json({ posts: posts });
   } catch (e) {
     console.log(e);
-    throw e;
+    return next(e);
   }
 };
 
@@ -132,5 +132,10 @@ app.get("/", (req, res) => {
 app.use("/users", router);
 app.use("/blogs", blogRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
+// Middleware global de gestion d'erreur
+app.use((err, req, res, next) => {
+  res.status(500).json({ error: err.message });
+});
 
 module.exports = app;
